@@ -38,35 +38,43 @@ export default function Home() {
                 </ButtonGroup>
               </div>
             </div>
-            <Card
-              overrides={{
-                Root: {
-                  style: {
-                    width: '232px',
-                    height: 'auto',
-                    // border: '0px',
-                  },
-                },
-              }}
+            <FlexGrid
+              flexGridColumnCount={3}
+              flexGridColumnGap='scale300'
+              flexGridRowGap='scale300'
             >
-              <StyledBody className={css({ margin: 0 })}>
-                <Image
-                  src='/album1.jpg'
-                  alt='album1'
-                  width={200}
-                  height={200}
-                  className={css({ borderRadius: '5%' })}
-                />
-                <div
-                  className={css({
-                    fontWeight: 'bold',
-                  })}
-                >
-                  Locked In
-                </div>
-                Post Malone
-              </StyledBody>
-            </Card>
+              <FlexGridItem>
+                <Card>
+                  <StyledBody>
+                    <div
+                      className={css({
+                        position: 'relative',
+                        width: '100%',
+                        height: '200px',
+                        marginBottom: '.5rem',
+                      })}
+                    >
+                      <Image
+                        src='/album3.jpg'
+                        alt='album1'
+                        // width={200}
+                        // height={200}
+                        fill
+                        className={css({ borderRadius: '5%' })}
+                      />
+                    </div>
+                    <div
+                      className={css({
+                        fontWeight: 'bold',
+                      })}
+                    >
+                      Locked In
+                    </div>
+                    Post Malone
+                  </StyledBody>
+                </Card>
+              </FlexGridItem>
+            </FlexGrid>
           </Cell>
         </Grid>
 

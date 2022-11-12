@@ -6,6 +6,7 @@ import {
 } from 'baseui/header-navigation';
 import { Cell, Grid } from 'baseui/layout-grid';
 import React, { ReactNode } from 'react';
+import { AudioLayout } from './AudioLayout';
 import { Button } from 'baseui/button';
 import { StyledLink as Link } from 'baseui/link';
 import { Navigation } from 'baseui/side-navigation';
@@ -26,6 +27,10 @@ const nav = [
         itemId: '/albums',
       },
       {
+        title: 'Liked Songs',
+        itemId: '/liked-songs',
+      },
+      {
         title: 'Mint',
         itemId: '/mint',
       },
@@ -33,7 +38,7 @@ const nav = [
   },
   {
     title: 'Earnings',
-    itemId: '#level1.3',
+    itemId: '/earnings',
   },
 ];
 
@@ -81,6 +86,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
         </Cell>
         <Cell span={9}>{children}</Cell>
       </Grid>
+      <AudioLayout />
     </>
   );
 };
