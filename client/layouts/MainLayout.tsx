@@ -73,7 +73,16 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
           </NavigationItem>
         </NavigationList>
       </HeaderNavigation>
-      <Grid>
+      <Grid
+        overrides={{
+          Grid: {
+            style: {
+              height: '70vh',
+              overflowY: 'auto',
+            },
+          },
+        }}
+      >
         <Cell span={3}>
           <Navigation
             items={nav}
