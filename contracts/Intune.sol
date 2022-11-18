@@ -39,7 +39,11 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
         _;
     }
 
-    constructor() ERC721("IntuneToken", "ITK") {
+    constructor() payable ERC721("IntuneToken", "ITK") {
+        require(
+            msg.value > 1 ether,
+            "More than 1 ether initial funding is required"
+        );
         mintFee = 0.35 ether;
     }
 

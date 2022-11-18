@@ -1,18 +1,16 @@
 import { ethers } from "hardhat";
 
+// Contract deployed to: 0x1f210c6c1Ba279be3797f31031915838850EadE3
+
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const amt = ethers.utils.parseEther("1.5");
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const Intune = await ethers.getContractFactory("IntuneToken");
+  const intune = await Intune.deploy({ value: amt });
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  await intune.deployed();
 
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log(`Contract deployed to: ${intune.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
