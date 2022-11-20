@@ -23,12 +23,7 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
     uint256 internal _totalLikedSongs;
     uint256 internal mintFee;
 
-    struct Song {
-        address payable owner;
-        uint256 likes;
-    }
-
-    mapping(uint256 => Song) internal songs;
+    mapping(uint256 => uint256) internal likes;
     mapping(address => uint256) internal earnings;
     mapping(address => mapping(uint => uint)) internal likedSongs;
     mapping(address => mapping(uint256 => bool)) internal _liked;
@@ -53,11 +48,11 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
      */
     function mintSong(string memory uri) public payable {
         require(bytes(uri).length > 15, "Invalid URI");
-        require(msg.value == mintFee, "Mint Fee of 2 ETH is required");
+        require(msg.value == mintFee, "Mint Fee of 0.35 ETH is required");
 
         uint256 tokenId = _totalSongs.current();
         _totalSongs.increment();
-        songs[tokenId] = Song(payable(msg.sender), 0);
+        likes[tokenId] = 0;
 
         // Pay to mint song
         bool success = IERC20(cUsdTokenAddress).transferFrom(
@@ -73,20 +68,15 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
     }
 
     /**
-     * @dev Get the minted song
+     * @dev Get the likes of a minted song
      * @param tokenId: the token Id of the minted song
-     * @return _owner
-     * @return likes
+     * @return _likes
      */
-    function getSong(uint256 tokenId)
-        public
-        view
-        returns (address _owner, uint256 likes)
-    {
+    function getLikes(uint256 tokenId) public view returns (uint256 _likes) {
         // Song has been minted
         require(_exists(tokenId), "Song has not been minted");
 
-        return (songs[tokenId].owner, songs[tokenId].likes);
+        return likes[tokenId];
     }
 
     /**
@@ -118,7 +108,7 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
         earnings[_ownerOf(tokenId)] = earnings[_ownerOf(tokenId)] + 0.15 ether;
 
         // increment the number of likes
-        songs[tokenId].likes++;
+        likes[tokenId] = likes[tokenId] + 1;
 
         // add song to the user's liked songs
         likedSongs[msg.sender][_totalLikedSongs] = tokenId;
