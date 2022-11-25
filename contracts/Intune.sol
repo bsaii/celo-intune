@@ -127,14 +127,21 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
 
     /**
      * @dev Get song liked by a user
+     * @param _id: the minted song token id
+     * @param _user: the address of the user
      * @return _tokenId Minted song token Id
      */
-    function getLikedSongs(uint256 _id) public view returns (uint256 _tokenId) {
-        return likedSongs[msg.sender][_id];
+    function getLikedSongs(uint256 _id, address _user)
+        public
+        view
+        returns (uint256 _tokenId)
+    {
+        return likedSongs[_user][_id];
     }
 
     /**
      * @dev Returns the earnings made on a song
+     * @param _owner: address of a owner
      * @return _amt Total amount earned
      */
     function getEarnings(address _owner) public view returns (uint256 _amt) {
@@ -143,6 +150,7 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
 
     /**
      * @dev Withdraw earnings earn from songs
+     * @param _owner: address of a owner
      * @param _owner: address of the owner of songs
      */
     function withdrawEarnings(address _owner) public payable {
