@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-// Contract deployed to: 0xB29094f86dB2827800dFb5d31743Cb42A92d508A
+// Contract deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 
 async function main() {
   const amt = ethers.utils.parseEther("1.5");

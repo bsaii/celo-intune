@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -10,9 +11,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title IntuneToken
- * @dev Turn your music into an NFt and earn tokens
+ * @notice Turn your music into an NFt and earn tokens
  */
-contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
+contract IntuneToken is ERC721, Ownable, ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
 
     // cUsdToken Address
@@ -23,7 +24,12 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
     uint256 internal _totalLikedSongs;
     uint256 internal mintFee;
 
-    mapping(uint256 => uint256) internal likes;
+    struct Song {
+        address payable owner;
+        uint256 likes;
+    }
+
+    mapping(uint256 => Song) internal songs;
     mapping(address => uint256) internal earnings;
     mapping(address => mapping(uint => uint)) internal likedSongs;
     mapping(address => mapping(uint256 => bool)) internal _liked;
@@ -52,12 +58,12 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
 
         uint256 tokenId = _totalSongs.current();
         _totalSongs.increment();
-        likes[tokenId] = 0;
+        songs[tokenId] = Song(payable(msg.sender), 0);
 
         // Pay to mint song
         bool success = IERC20(cUsdTokenAddress).transferFrom(
             msg.sender,
-            address(this),
+            owner(),
             mintFee
         );
         require(success, "Payment failed for mint fee");
@@ -68,26 +74,27 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
     }
 
     /**
-     * @dev Get the likes of a minted song
+     * @dev Get the minted song
      * @param tokenId: the token Id of the minted song
-     * @return _likes
+     * @return _owner
+     * @return likes
      */
-    function getLikes(uint256 tokenId) public view returns (uint256 _likes) {
+    function getSong(
+        uint256 tokenId
+    ) public view returns (address _owner, uint256 likes) {
         // Song has been minted
         require(_exists(tokenId), "Song has not been minted");
 
-        return likes[tokenId];
+        return (songs[tokenId].owner, songs[tokenId].likes);
     }
 
     /**
      * @dev Allow user to like a song
      * @param tokenId: the id of the minted song
      */
-    function likeSong(uint256 tokenId)
-        public
-        payable
-        liked(msg.sender, tokenId)
-    {
+    function likeSong(
+        uint256 tokenId
+    ) public payable liked(msg.sender, tokenId) {
         require(msg.value == 0.15 ether, "Can't like song with 0 ETH");
 
         // Song has been minted
@@ -108,12 +115,13 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
         earnings[_ownerOf(tokenId)] = earnings[_ownerOf(tokenId)] + 0.15 ether;
 
         // increment the number of likes
-        likes[tokenId] = likes[tokenId] + 1;
+        songs[tokenId].likes++;
 
         // add song to the user's liked songs
         likedSongs[msg.sender][_totalLikedSongs] = tokenId;
         _totalLikedSongs++;
 
+        // user liked the song
         _liked[msg.sender][tokenId] = true;
     }
 
@@ -127,21 +135,15 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
 
     /**
      * @dev Get song liked by a user
-     * @param _id: the minted song token id
-     * @param _user: the address of the user
+     * @param _id: the index for liked song
      * @return _tokenId Minted song token Id
      */
-    function getLikedSongs(uint256 _id, address _user)
-        public
-        view
-        returns (uint256 _tokenId)
-    {
-        return likedSongs[_user][_id];
+    function getLikedSongs(uint256 _id) public view returns (uint256 _tokenId) {
+        return likedSongs[msg.sender][_id];
     }
 
     /**
      * @dev Returns the earnings made on a song
-     * @param _owner: address of a owner
      * @return _amt Total amount earned
      */
     function getEarnings(address _owner) public view returns (uint256 _amt) {
@@ -150,7 +152,6 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
 
     /**
      * @dev Withdraw earnings earn from songs
-     * @param _owner: address of a owner
      * @param _owner: address of the owner of songs
      */
     function withdrawEarnings(address _owner) public payable {
@@ -188,28 +189,21 @@ contract IntuneToken is ERC721, ERC721Enumerable, ERC721URIStorage {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    function _burn(uint256 tokenId)
-        internal
-        override(ERC721, ERC721URIStorage)
-    {
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
