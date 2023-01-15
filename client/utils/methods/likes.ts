@@ -1,10 +1,11 @@
-import { Contract } from 'web3-eth-contract';
+import { IERC20, Intune } from '../../types/web3-v1-contracts';
+import { IntuneContractAddress } from '../../hooks/useContract';
 import { UseCelo } from '@celo/react-celo';
 import { fetchNftOwner } from './minter';
 
 export const _likeSong = async (
-  intuneContract: Contract,
-  cUsdContract: Contract,
+  intuneContract: Intune,
+  cUsdContract: IERC20,
   performActions: UseCelo['performActions'],
   id: number,
 ) => {
@@ -25,10 +26,13 @@ export const _likeSong = async (
         throw new Error('Owner can\'t like song');
       }
       // approve for Token transfer of mintFee
-      await cUsdContract.methods.approve(
-        intuneContract,
-        kit.connection.web3.utils.toWei('0.15'),
-      );
+      await cUsdContract.methods
+        .approve(
+          IntuneContractAddress,
+          kit.connection.web3.utils.toWei('0.15', 'ether'),
+        )
+        .send({ from: defaultAccount });
+
       return await intuneContract.methods
         .likeSong(id)
         .send({ from: defaultAccount });
@@ -38,30 +42,27 @@ export const _likeSong = async (
   });
 };
 
-export type GetLikedSongs = {
+export interface GetLikedSongs {
   index: number;
   tokenId: number;
-};
+}
 
-export const _getLikedSongs = async (
-  intuneContract: Contract,
-  address: string,
-) => {
+export const _getLikedSongs = async (intuneContract: Intune) => {
   try {
     const likedSongs: GetLikedSongs[] = [];
     const likedSongsLength = await intuneContract.methods
       .totalLikedSongs()
       .call();
     for (let i = 0; i < Number(likedSongsLength); i++) {
-      // eslint-disable-next-line no-async-promise-executor
-      const likedSong = new Promise<GetLikedSongs>(async (resolve) => {
-        const res = await intuneContract.methods
-          .getLikedSongs(i, address)
-          .call();
-        resolve({
-          index: i,
-          tokenId: res,
-        });
+      const likedSong = new Promise<GetLikedSongs>((resolve) => {
+        void (async () => {
+          const res = await intuneContract.methods.getLikedSongs(i).call();
+
+          resolve({
+            index: i,
+            tokenId: parseInt(res),
+          });
+        })();
       });
       likedSongs.unshift(await likedSong);
     }
@@ -69,6 +70,6 @@ export const _getLikedSongs = async (
   } catch (error) {
     // eslint-disable-next-line prettier/prettier
     console.error('Error getting user\'s liked songs: ', error);
-    
+
   }
 };

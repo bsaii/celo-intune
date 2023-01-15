@@ -10,6 +10,8 @@ import { AudioLayout } from './AudioLayout';
 import { Button } from 'baseui/button';
 import { StyledLink as Link } from 'baseui/link';
 import { Navigation } from 'baseui/side-navigation';
+import { truncateAddress } from '../utils';
+import { useCelo } from '@celo/react-celo';
 import { useRouter } from 'next/router';
 
 const nav = [
@@ -69,7 +71,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
         </NavigationList>
         <NavigationList $align={ALIGN.right}>
           <NavigationItem>
-            <Button>Connect</Button>
+            <ConnectWallet />
           </NavigationItem>
         </NavigationList>
       </HeaderNavigation>
@@ -101,3 +103,17 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
 };
 
 export default MainLayout;
+
+function ConnectWallet() {
+  const { address, connect } = useCelo();
+
+  return (
+    <>
+      {address ? (
+        <Button>{truncateAddress(address)}</Button>
+      ) : (
+        <Button onClick={connect}>Connect</Button>
+      )}
+    </>
+  );
+}

@@ -1,35 +1,34 @@
-import { Contract } from 'web3-eth-contract';
+import { IERC20, Intune } from '../../types/web3-v1-contracts';
+import { IntuneContractAddress } from '../../hooks/useContract';
 import { UseCelo } from '@celo/react-celo';
 
-export const _getEarnings = async (intuneContract: Contract, owner: string) => {
+export const _getEarnings = async (intuneContract: Intune, owner: string) => {
   try {
-    const earnings = await intuneContract.methods.getEarnings(owner).call();
-    return earnings as number;
+    return await intuneContract.methods.getEarnings(owner).call();
   } catch (error) {
     console.error('Error getting earnings: ', error);
   }
 };
 
 export const _withdrawEarnings = async (
-  intuneContract: Contract,
-  cUsdContract: Contract,
+  intuneContract: Intune,
+  cUsdContract: IERC20,
   performActions: UseCelo['performActions'],
   owner: string,
 ) => {
   await performActions(async (kit) => {
     const defaultAccount = kit.connection.defaultAccount;
     if (!defaultAccount) {
-      throw new Error('_withdrawEarnings: No default account');
+      throw new Error('function _withdrawEarnings: No default account');
     }
 
     try {
       // Get the earnings
-      const earnings = String(_getEarnings(intuneContract, owner));
+      const earnings = _getEarnings(intuneContract, defaultAccount);
       // approve for Token transfer of mintFee
-      await cUsdContract.methods.approve(
-        intuneContract,
-        kit.connection.web3.utils.toWei(earnings),
-      );
+      await cUsdContract.methods
+        .approve(IntuneContractAddress, earnings as unknown as string)
+        .send({ from: defaultAccount });
       return intuneContract.methods
         .withdrawEarnings(owner)
         .send({ from: defaultAccount });

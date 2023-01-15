@@ -1,17 +1,26 @@
 import Document, {
   DocumentContext,
+  DocumentInitialProps,
   Head,
   Html,
   Main,
   NextScript,
 } from 'next/document';
+import { Server } from 'styletron-engine-atomic';
 import { Provider as StyletronProvider } from 'styletron-react';
+import { sheetT } from 'styletron-engine-atomic/lib/server/server';
 import { styletron } from '../styletron';
 
-class MyDocument extends Document {
-  static async getInitialProps(context: DocumentContext) {
-    const renderPage = () =>
-      context.renderPage({
+class MyDocument extends Document<{ stylesheets: sheetT[] }> {
+  static async getInitialProps(
+    ctx: DocumentContext,
+  ): Promise<DocumentInitialProps & { stylesheets: sheetT[] }> {
+    const page = ctx.renderPage;
+
+    // Run the React rendering logic synchronously
+    ctx.renderPage = () =>
+      page({
+        // Useful for wrapping the whole react tree
         enhanceApp: (App) => (props) =>
           (
             <StyletronProvider value={styletron}>
@@ -20,19 +29,19 @@ class MyDocument extends Document {
           ),
       });
 
-    const initialProps = await Document.getInitialProps({
-      ...context,
-      renderPage,
-    });
-    const stylesheets = styletron?.getStylesheets() || [];
+    // Run the parent `getInitialProps`, it now includes the custom `renderPage`
+    const initialProps = await Document.getInitialProps(ctx);
+    const stylesheets = (styletron as Server).getStylesheets() || [];
+
     return { ...initialProps, stylesheets };
   }
 
-  render() {
+  // eslint-disable-next-line no-undef
+  render(): JSX.Element {
     return (
-      <Html>
+      <Html lang='en'>
         <Head>
-          {this.props?.stylesheets.map((sheet, i) => (
+          {this.props.stylesheets.map((sheet, i) => (
             <style
               className='_styletron_hydrate_'
               dangerouslySetInnerHTML={{ __html: sheet.css }}
