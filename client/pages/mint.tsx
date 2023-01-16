@@ -1,52 +1,61 @@
 import { Button, ButtonProps, KIND, SHAPE, SIZE } from 'baseui/button';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { IERC20, Intune } from '../types/web3-v1-contracts';
+import { MintSong, mintSong, uploadFileToWebStorage } from '../utils/methods';
 import { ProgressSteps, Step } from 'baseui/progress-steps';
-import React, { useState } from 'react';
-import FileUpload from '../components/FileUpload';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCUSDContractWithSigner,
+  useIntuneContractWithSigner,
+} from '../hooks';
+import { FileUploader } from 'baseui/file-uploader';
 import { FormControl } from 'baseui/form-control';
 import Head from 'next/head';
 import { HeadingLarge } from 'baseui/typography';
 import { Input } from 'baseui/input';
+import { useCelo } from '@celo/react-celo';
 import { useStyletron } from 'baseui';
 
-interface MintFormInput {
-  album: string;
-  artist: string;
-  albumImage: string;
-  songs: {
-    name: string;
-    duration: string;
-    audio: string;
-  };
-}
-
-interface Songs {
-  name: string;
-  duration: string;
-  audio: string;
-}
-
 export default function Mint() {
+  const [artist, setArtist] = useState<string>('');
+  const [coverImage, setCoverImage] = useState<string>('');
+  const [audio, setAudio] = useState<string>('');
+  const [title, setTitle] = useState<string>('');
   const [current, setCurrent] = useState(0);
-  const [allSongs, setAllSongs] = useState<Songs[]>([]);
+
   const [css, theme] = useStyletron();
-  const {
-    control,
-    formState: { errors },
-    handleSubmit,
-    getValues,
-    reset,
-  } = useForm<MintFormInput>();
+  const intuneContractWithSigner = useIntuneContractWithSigner();
+  const cUsdContractWithSigner = useCUSDContractWithSigner();
+  const [progressAmount, startFakeProgress, stopFakeProgress] =
+    useFakeProgress();
+  const { performActions } = useCelo();
 
-  const onSubmit: SubmitHandler<MintFormInput> = (data) => {
-    console.log(data);
-  };
-
-  function addAnother(data: Songs) {
-    if (!!data.audio && !!data.duration && !!data.name) return;
-    setAllSongs([...allSongs, data]);
-    console.log(allSongs);
-  }
+  const _mintSong = useCallback(async () => {
+    const data: MintSong = {
+      animation_url: audio,
+      artist,
+      duration: '0',
+      image: coverImage,
+      title,
+    };
+    try {
+      await mintSong(
+        intuneContractWithSigner as Intune,
+        cUsdContractWithSigner as IERC20,
+        performActions,
+        data,
+      ).then((res) => console.log(res));
+    } catch (error) {
+      console.error(error);
+    }
+  }, [
+    artist,
+    audio,
+    cUsdContractWithSigner,
+    coverImage,
+    intuneContractWithSigner,
+    performActions,
+    title,
+  ]);
 
   return (
     <div>
@@ -59,58 +68,55 @@ export default function Mint() {
           Turn your music into NFT on InTune
         </HeadingLarge>
         <ProgressSteps current={current}>
-          <Step title='Create Album'>
+          <Step title='Get started'>
             <div
               className={css({
                 ...theme.typography.ParagraphSmall,
                 marginBottom: '24px',
               })}
             >
-              Here is some step content
+              Artist and cover image.
             </div>
-            <Controller
-              control={control}
-              name='album'
-              defaultValue=''
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <FormControl>
-                  <Input
-                    value={field.value}
-                    onChange={(event) =>
-                      field.onChange(event.currentTarget.value)
-                    }
-                    placeholder='Album Name'
-                    error={!!fieldState.error}
-                  />
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name='artist'
-              defaultValue=''
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <FormControl>
-                  <Input
-                    value={field.value}
-                    onChange={(event) =>
-                      field.onChange(event.currentTarget.value)
-                    }
-                    placeholder='Artist'
-                    error={!!fieldState.error}
-                  />
-                </FormControl>
-              )}
-            />
-            <FormControl label={() => 'Album Image'}>
-              <FileUpload />
+            <FormControl>
+              <Input
+                value={artist}
+                onChange={(event) => {
+                  setArtist(event.target.value);
+                }}
+                placeholder='Artist'
+              />
+            </FormControl>
+            <FormControl label={() => 'Cover Image'}>
+              <FileUploader
+                onCancel={stopFakeProgress}
+                onDrop={(acceptedFiles, rejectedFiles) => {
+                  // handle file upload...
+                  console.log(acceptedFiles, rejectedFiles);
+                  if (acceptedFiles.length > 0) {
+                    void (async () => {
+                      await uploadFileToWebStorage(acceptedFiles).then(
+                        (res) => {
+                          setCoverImage(res);
+                        },
+                      );
+                    })();
+                  }
+                  startFakeProgress();
+                }}
+                // progressAmount is a number from 0 - 100 which indicates the percent of file transfer completed
+                progressAmount={progressAmount}
+                progressMessage={
+                  progressAmount
+                    ? `Uploading... ${progressAmount}% of 100%`
+                    : ''
+                }
+              />
             </FormControl>
             <SpacedButton disabled>Previous</SpacedButton>
             <SpacedButton
+              disabled={!artist || !coverImage}
               onClick={() => {
-                if (!errors.album) {
+                if (artist && coverImage) {
                   setCurrent(1);
                 }
               }}
@@ -125,64 +131,49 @@ export default function Mint() {
                 marginBottom: '24px',
               })}
             >
-              Add the songs of your album
+              Song title and audio file.
             </div>
-            <Controller
-              control={control}
-              name='songs.name'
-              defaultValue=''
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <FormControl>
-                  <Input
-                    value={field.value}
-                    onChange={(event) =>
-                      field.onChange(event.currentTarget.value)
-                    }
-                    placeholder='Song'
-                    error={!!fieldState.error}
-                  />
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name='songs.duration'
-              defaultValue=''
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <FormControl>
-                  <Input
-                    value={field.value}
-                    onChange={(event) =>
-                      field.onChange(event.currentTarget.value)
-                    }
-                    placeholder='Duration'
-                    error={!!fieldState.error}
-                  />
-                </FormControl>
-              )}
-            />
-            <FormControl label={() => 'Audio File'}>
-              <FileUpload />
+            <FormControl>
+              <Input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder='Title'
+              />
             </FormControl>
-            <Button
+            <FormControl label={() => 'Audio File'}>
+              <FileUploader
+                onCancel={stopFakeProgress}
+                onDrop={(acceptedFiles, rejectedFiles) => {
+                  // handle file upload...
+                  console.log(acceptedFiles, rejectedFiles);
+                  if (acceptedFiles.length > 0) {
+                    void (async () => {
+                      await uploadFileToWebStorage(acceptedFiles).then(
+                        (res) => {
+                          setAudio(res);
+                        },
+                      );
+                    })();
+                  }
+                  startFakeProgress();
+                }}
+                // progressAmount is a number from 0 - 100 which indicates the percent of file transfer completed
+                progressAmount={progressAmount}
+                progressMessage={
+                  progressAmount
+                    ? `Uploading... ${progressAmount}% of 100%`
+                    : ''
+                }
+              />
+            </FormControl>
+            <SpacedButton onClick={() => setCurrent(0)}>Previous</SpacedButton>
+            <SpacedButton
               onClick={() => {
-                const songsValues = getValues('songs');
-                addAnother(songsValues);
-                // reset({
-                //   songs: {
-                //     name: '',
-                //     duration: '',
-                //     audio: '',
-                //   },
-                // });
+                void _mintSong();
               }}
             >
-              Add Another
-            </Button>
-            <SpacedButton onClick={() => setCurrent(0)}>Previous</SpacedButton>
-            <SpacedButton disabled>Next</SpacedButton>
+              Mint
+            </SpacedButton>
           </Step>
         </ProgressSteps>
       </main>
@@ -208,4 +199,49 @@ function SpacedButton(props: ButtonProps) {
       }}
     />
   );
+}
+
+// https://overreacted.io/making-setinterval-declarative-with-react-hooks/
+function useInterval(callback: any, delay: number | null) {
+  const savedCallback = useRef(() => {});
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+  // Set up the interval.
+  useEffect((): any => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+// useFakeProgress is an elaborate way to show a fake file transfer for illustrative purposes. You
+// don't need this is your application. Use metadata from your upload destination if it's available,
+// or don't provide progress.
+function useFakeProgress(): [number, () => void, () => void] {
+  const [fakeProgress, setFakeProgress] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  function stopFakeProgress() {
+    setIsActive(false);
+    setFakeProgress(0);
+  }
+  function startFakeProgress() {
+    setIsActive(true);
+  }
+  useInterval(
+    () => {
+      if (fakeProgress >= 100) {
+        stopFakeProgress();
+      } else {
+        setFakeProgress(fakeProgress + 10);
+      }
+    },
+    isActive ? 500 : null,
+  );
+  return [fakeProgress, startFakeProgress, stopFakeProgress];
 }

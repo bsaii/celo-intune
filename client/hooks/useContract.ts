@@ -8,7 +8,7 @@ import { useCelo } from '@celo/react-celo';
 import ERC20Abi from '../utils/ABIs/IERC20.json';
 import IntuneAbi from '../utils/ABIs/Intune.json';
 export const IntuneContractAddress =
-  '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+  '0xb00d0505dca3D1419E49e3B9F3Abbee5CD374B4B';
 const cUsdTokenAddress = '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1';
 const RPC_HOST = 'https://alfajores-forno.celo-testnet.org';
 

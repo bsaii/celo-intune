@@ -29,7 +29,7 @@ export interface MintSong {
 }
 
 /** @dev mint a song */
-export const _mintSong = async (
+export const mintSong = async (
   intuneContract: Intune,
   cUsdContract: IERC20,
   performActions: UseCelo['performActions'],
@@ -73,7 +73,7 @@ export const _mintSong = async (
         .send({ from: defaultAccount });
 
       // mint the NFT and save the IPFS url to the blockchain
-      let mint = await intuneContract.methods
+      const mint = await intuneContract.methods
         .mintSong(metadataUri)
         .send({ from: defaultAccount });
 
@@ -170,7 +170,7 @@ export type GetSong = {
 };
 
 /** @dev Get all minted songs */
-export const getSong = async (intuneContract: Intune) => {
+export const getSongs = async (intuneContract: Intune) => {
   try {
     const songs: Array<GetSong> = [];
     const songsLength = await intuneContract.methods.totalSupply().call();
