@@ -54,7 +54,6 @@ contract IntuneToken is ERC721, Ownable, ERC721Enumerable, ERC721URIStorage {
      */
     function mintSong(string memory uri) public payable {
         require(bytes(uri).length > 15, "Invalid URI");
-        require(msg.value == mintFee, "Mint Fee of 0.35 ETH is required");
 
         uint256 tokenId = _totalSongs.current();
         _totalSongs.increment();
@@ -95,8 +94,6 @@ contract IntuneToken is ERC721, Ownable, ERC721Enumerable, ERC721URIStorage {
     function likeSong(
         uint256 tokenId
     ) public payable liked(msg.sender, tokenId) {
-        require(msg.value == 0.15 ether, "Can't like song with 0 ETH");
-
         // Song has been minted
         require(_exists(tokenId), "Song has not been minted");
 
@@ -135,7 +132,6 @@ contract IntuneToken is ERC721, Ownable, ERC721Enumerable, ERC721URIStorage {
 
     /**
      * @dev Get song liked by a user
-     * @param _id: the index for liked song
      * @return _tokenId Minted song token Id
      */
     function getLikedSongs(uint256 _id) public view returns (uint256 _tokenId) {

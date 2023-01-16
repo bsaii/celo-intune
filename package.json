@@ -5,7 +5,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "remixd": "remixd -s ./contracts --remix-ide https://remix.ethereum.org"
+    "compile": "hardhat compile",
+    "remixd": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
+    "deploy:alfajores": "hardhat run --network alfajores scripts/deploy.ts"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
