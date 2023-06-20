@@ -1,0 +1,53 @@
+{
+  "name": "celo-intune",
+  "version": "1.0.0",
+  "description": "Custom Celo Composer project.",
+  "private": true,
+  "author": "Celo",
+  "license": "MIT",
+  "scripts": {
+    "react-app:dev": "yarn workspace @celo-intune/react-app dev",
+    "react-app:build": "yarn workspace @celo-intune/react-app build",
+    "react-app:start": "yarn workspace @celo-intune/react-app start",
+    "react-app:lint": "yarn workspace @celo-intune/react-app lint",
+    "react-app:lint-fix": "yarn workspace @celo-intune/react-app lint:fix",
+    "react-app:check": "yarn workspace @celo-intune/react-app check",
+    "react-app:format": "yarn workspace @celo-intune/react-app format",
+    "hardhat:test": "yarn workspace @celo-intune/hardhat test",
+    "hardhat:test-local": "yarn workspace @celo-intune/hardhat test-local",
+    "hardhat:accounts": "yarn workspace @celo-intune/hardhat accounts",
+    "hardhat:devchain": "yarn workspace @celo-intune/hardhat devchain",
+    "hardhat:deploy": "yarn workspace @celo-intune/hardhat deploy",
+    "hardhat:deploy-reset-watch": "yarn workspace @celo-intune/hardhat deploy-reset-watch",
+    "hardhat:watch": "yarn workspace @celo-intune/hardhat watch",
+    "hardhat:fork-mainnet": "yarn workspace @celo-intune/hardhat fork-mainnet",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/celo-org/celo-composer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/celo-org/celo-composer/issues"
+  },
+  "homepage": "https://github.com/celo-org/celo-composer/blob/main/README.md",
+  "workspaces": [
+    "packages/*"
+  ],
+  "keywords": [
+    "celo-composer",
+    "celo"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.5",
+    "@commitlint/config-conventional": "^17.6.5",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
