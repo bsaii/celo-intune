@@ -34,6 +34,7 @@ const config: HardhatUserConfig = {
       url: 'https://alfajores-forno.celo-testnet.org',
       accounts: [process.env.PRIVATE_KEY ?? ''],
       chainId: 44787,
+      timeout: 300000,
     },
     celo: {
       url: 'https://forno.celo.org',
