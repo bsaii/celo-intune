@@ -9,8 +9,11 @@ This project demonstrates a basic Hardhat use case. It comes with a sample contr
 **Note** This setup is not required when using a local development blockchain (like celo-devchain or Ganache).
 
 1. Create a `.env` file similar to `.envexample`.
+
 2. Paste the private key in `.env`.
-> note: depending on how you generate your private key, you may have to prepend `0x` in the private key does not already have it prepended. 
+
+> note: depending on how you generate your private key, you may have to prepend `0x` in the private key does not already have it prepended.
+
 3. Faucet your account with the Alfajores testnet faucet [here](https://celo.org/developers/faucet).
 
 ## Develop
