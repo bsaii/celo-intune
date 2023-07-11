@@ -48,7 +48,6 @@
     "@redstone-finance/evm-connector": "^0.0.15",
     "ganache": "^7.5.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^4.8.4",
     "web3": "^1.8.0",
     "web3-core": "^1.8.0",
     "web3-eth-contract": "^1.8.0"
