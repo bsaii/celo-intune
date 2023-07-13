@@ -17,6 +17,10 @@ const mnemonicPath = "m/44'/52752'/0'/0"; // derivation path used by Celo
 const DEVCHAIN_MNEMONIC =
   'concert load couple harbor equip island argue ramp clarify fence smart topic';
 
+const alfajoresUrl =
+  process.env.INFURA_ALFAJORES_ENDPOINT ??
+  'https://alfajores-forno.celo-testnet.org';
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -31,7 +35,7 @@ const config: HardhatUserConfig = {
       },
     },
     alfajores: {
-      url: 'https://alfajores-forno.celo-testnet.org',
+      url: alfajoresUrl,
       accounts: [process.env.PRIVATE_KEY ?? ''],
       chainId: 44787,
       timeout: 300000,
