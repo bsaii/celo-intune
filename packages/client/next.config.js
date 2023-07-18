@@ -10,6 +10,9 @@ const nextConfig = {
     };
     return config;
   },
+  images: {
+    domains: ['saii.infura-ipfs.io'],
+  },
 };
 
 module.exports = nextConfig;
