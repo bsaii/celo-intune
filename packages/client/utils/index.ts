@@ -1,7 +1,22 @@
-export const formatDuration = (durationInSeconds: number): string => {
-  const minutes = Math.floor(durationInSeconds / 60);
-  const seconds = Math.floor(durationInSeconds % 60);
-  const formattedMinutes = String(minutes).padStart(2, '0');
-  const formattedSeconds = String(seconds).padStart(2, '0');
-  return `${formattedMinutes}:${formattedSeconds}`;
+export const formatDuration = (seconds: number) => {
+  const date = new Date(seconds * 1000);
+  const hh = date.getUTCHours();
+  const mm = date.getUTCMinutes();
+  const ss = pad(date.getUTCSeconds().toString());
+  if (hh) {
+    return `${hh}:${pad(mm.toString())}:${ss}`;
+  }
+  return `${mm}:${ss}`;
+};
+
+function pad(str: string) {
+  return ('0' + str).slice(-2);
+}
+
+export const truncateString = (inputString: string, maxLength: number) => {
+  if (inputString.length <= maxLength) {
+    return inputString;
+  } else {
+    return inputString.slice(0, maxLength);
+  }
 };

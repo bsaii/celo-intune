@@ -23,6 +23,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.45.1",
+    "react-player": "^2.12.0",
     "styletron-engine-atomic": "^1.5.0",
     "styletron-engine-monolithic": "^1.0.0",
     "styletron-react": "^6.1.0",

@@ -2,7 +2,6 @@ import { Card, StyledAction, StyledBody } from 'baseui/card';
 import { Cell, Grid } from 'baseui/layout-grid';
 import { DisplayMedium, HeadingLarge } from 'baseui/typography';
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';
-// import AlbumModal from '../components/AlbumModal';
 import { Button } from 'baseui/button';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -11,14 +10,14 @@ import { Skeleton } from 'baseui/skeleton';
 import { SongsData } from './api/songs';
 import { fetcher } from '@/lib/fetcher';
 import { useAccount } from 'wagmi';
+import { useAppContext } from '@/lib/context';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { useStyletron } from 'baseui';
-// import { useToggleModal } from '../hooks/useToggleModal';
 
 export default function Songs() {
   const [css] = useStyletron();
-  // const { isModalOpen, toggleConfirm } = useToggleModal();
+  const { dispatch } = useAppContext();
   const {
     data: songs,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -131,10 +130,29 @@ export default function Songs() {
                             justifyContent: 'flex-end',
                           })}
                         >
-                          <Button onClick={() => console.log('play')}>
+                          <Button onClick={() => console.log('sell')}>
                             Sell
                           </Button>
-                          <Button onClick={() => console.log('play')}>
+                          <Button
+                            onClick={() => {
+                              dispatch({
+                                type: 'setAudioUrl',
+                                payload: song.metadata.animation_url,
+                              });
+                              dispatch({
+                                type: 'setPlayed',
+                                payload: 0,
+                              });
+                              dispatch({
+                                type: 'setSong',
+                                payload: {
+                                  artist: song.metadata.artist,
+                                  cover: song.metadata.image,
+                                  title: song.metadata.name,
+                                },
+                              });
+                            }}
+                          >
                             PLAY
                           </Button>
                         </StyledAction>
@@ -161,7 +179,6 @@ export default function Songs() {
             </FlexGrid>
           </Cell>
         </Grid>
-        {/* <AlbumModal isModalOpen={isModalOpen} close={close} /> */}
       </main>
     </>
   );

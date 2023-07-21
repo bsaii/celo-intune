@@ -10,8 +10,6 @@ A URL to a multi-media attachment for the item. The file extensions GLTF, GLB, W
   animation_url: string;
   /** The name of the artist */
   artist: string;
-  // /** The duration of the song */
-  duration: string;
 }
 
 const INFURA_DEDICATED_GATEWAY_SUBDOMAIN =

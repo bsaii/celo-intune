@@ -14,7 +14,6 @@ import { FileUploader } from 'baseui/file-uploader';
 import { FormControl } from 'baseui/form-control';
 import Head from 'next/head';
 import { Input } from 'baseui/input';
-import { formatDuration } from '@/utils';
 import { toaster } from 'baseui/toast';
 import { useAccount } from 'wagmi';
 import { useAppContext } from '@/lib/context';
@@ -26,7 +25,6 @@ interface MintSongValues {
   coverImage: string;
   audio: string;
   title: string;
-  duration: string;
 }
 
 export default function Mint() {
@@ -44,7 +42,6 @@ export default function Mint() {
       audio: '',
       coverImage: '',
       title: '',
-      duration: '00:00',
     },
   });
 
@@ -74,11 +71,10 @@ export default function Mint() {
     }
 
     try {
-      const { artist, audio, coverImage, duration, title } = data;
+      const { artist, audio, coverImage, title } = data;
       const metadata: SongMetadata = {
         animation_url: audio,
         artist,
-        duration,
         image: coverImage,
         name: title,
       };
@@ -221,16 +217,6 @@ export default function Mint() {
                 onDrop={(acceptedFiles, rejectedFiles) => {
                   // handle file upload...
                   if (acceptedFiles.length > 0) {
-                    // duration
-                    const audio = new Audio();
-                    audio.src = URL.createObjectURL(acceptedFiles[0]);
-                    audio.addEventListener('loadedmetadata', () => {
-                      const durationInSeconds = audio.duration;
-                      const formattedDuration =
-                        formatDuration(durationInSeconds);
-                      setValue('duration', formattedDuration);
-                    });
-
                     void (async () => {
                       await uploadFileToIPFS(
                         acceptedFiles[0],
